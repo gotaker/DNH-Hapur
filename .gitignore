@@ -50,3 +50,6 @@ playwright-report/
 test-results/
 .vitest-coverage
 coverage/
+
+# generated tool output (graphify skill)
+graphify-out/
