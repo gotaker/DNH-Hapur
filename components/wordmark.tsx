@@ -1,24 +1,36 @@
+import Image from 'next/image';
 import { cn } from '@/lib/cn';
 
+import logoSrc from '../public/brand/dnh-logo.png';
+
 /**
- * DNH wordmark — bilingual lockup.
+ * DNH wordmark — horizontal lockup PNG.
  *
- * Two registers stacked or in line: a tight Latin abbreviation (DNH)
- * and the Devanagari full name (देव नंदिनी), separated by a thin
- * vertical hairline that doubles as the institutional rule. The mark
- * uses the same Tiro family as the rest of the typography contract,
- * so the wordmark sits inside the type system rather than next to it.
+ * The institutional mark is a fixed-art lockup (arrow/house glyph + the
+ * Latin wordmark "DEVNANDINI HOSPITAL"). We render it as an Image so it
+ * remains pixel-faithful to the source artwork; sizing is controlled by
+ * height (the image keeps its native aspect ratio).
  *
- * SVG so it scales crisply, prints to one ink, and switches tone
- * (light or ink) for use on either surface or brand-deep backgrounds.
+ * The `tone` and `variant` props are kept for backward-compatibility with
+ * the prior typographic wordmark, but the artwork itself does not change
+ * between them. On dark surfaces, callers should ensure the logo has
+ * enough contrast (the artwork is brand-blue on transparent).
  */
 type Tone = 'ink' | 'light';
 type Variant = 'inline' | 'stacked';
 
+const HEIGHTS: Record<'sm' | 'md' | 'lg', number> = {
+  sm: 28,
+  md: 40,
+  lg: 60,
+};
+
+const ASPECT = 450 / 71;
+
 export function Wordmark({
-  tone = 'ink',
+  tone: _tone = 'ink',
   size = 'md',
-  variant = 'inline',
+  variant: _variant = 'inline',
   className,
   showFull = false,
 }: {
@@ -28,62 +40,23 @@ export function Wordmark({
   className?: string;
   showFull?: boolean;
 }) {
-  const sizePx = size === 'sm' ? 26 : size === 'lg' ? 56 : 38;
-  const fg = tone === 'light' ? 'currentColor' : 'currentColor';
-  const colorClass = tone === 'light' ? 'text-surface' : 'text-ink';
-  const accentClass = tone === 'light' ? 'text-accent' : 'text-brand';
-
-  if (variant === 'stacked') {
-    return (
-      <span className={cn('inline-flex flex-col leading-none', colorClass, className)}>
-        <span
-          aria-hidden
-          className="font-display"
-          style={{ fontSize: sizePx, letterSpacing: '-0.02em', color: fg }}
-        >
-          DNH
-        </span>
-        <span
-          aria-hidden
-          className="font-display"
-          style={{ fontSize: sizePx * 0.5, letterSpacing: '0', marginTop: 4, color: fg }}
-          lang="hi"
-        >
-          देव नंदिनी
-        </span>
-        {showFull ? <span className="sr-only">Dev Nandini Hospital and Medical College</span> : null}
-      </span>
-    );
-  }
+  const height = HEIGHTS[size];
+  const width = Math.round(height * ASPECT);
 
   return (
-    <span className={cn('inline-flex items-baseline gap-2.5', colorClass, className)}>
-      <span
-        aria-hidden
-        className="font-display leading-none"
-        style={{ fontSize: sizePx, letterSpacing: '-0.02em' }}
-      >
-        DNH
-      </span>
-      <span
-        aria-hidden
-        className={cn('inline-block leading-none', accentClass)}
-        style={{
-          width: 1,
-          height: sizePx * 0.62,
-          backgroundColor: 'currentColor',
-          alignSelf: 'center',
-        }}
+    <span className={cn('inline-flex items-center', className)}>
+      <Image
+        src={logoSrc}
+        alt="Devnandini Hospital"
+        width={width}
+        height={height}
+        priority
+        sizes={`${width}px`}
+        style={{ height, width: 'auto' }}
       />
-      <span
-        aria-hidden
-        className="font-display leading-none"
-        style={{ fontSize: sizePx * 0.66, letterSpacing: '0' }}
-        lang="hi"
-      >
-        देव नंदिनी
-      </span>
-      {showFull ? <span className="sr-only">Dev Nandini Hospital and Medical College</span> : null}
+      {showFull ? (
+        <span className="sr-only">Dev Nandini Hospital and Medical College</span>
+      ) : null}
     </span>
   );
 }
