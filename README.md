@@ -10,10 +10,10 @@ Bilingual institutional site for **Dev Nandini Hospital and Medical College**, H
 
 | Layer | Choice |
 |---|---|
-| Framework | Next.js 15 (App Router, RSC, Turbopack) + React 19 |
+| Framework | Next.js 16.2.6 (App Router, RSC, Turbopack) + React 19.2.0 — both pinned exact |
 | Language | TypeScript strict |
 | Styling | Tailwind CSS v4 (CSS-first `@theme` in `app/globals.css`) |
-| i18n | `next-intl` v3, `[locale]` segment, default `hi` |
+| i18n | `next-intl` v4, `[locale]` segment, default `hi`, request interception via `proxy.ts` |
 | Fonts | Tiro Devanagari Hindi (display) + Hind (body), bilingual matched cuts |
 | CMS (phase 5) | Payload CMS, Postgres backend |
 | Tests | Vitest + happy-dom (unit), Playwright + axe-core (E2E + a11y) |

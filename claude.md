@@ -78,9 +78,10 @@ A bilingual (Hindi default, English secondary) institutional site for Dev Nandin
 
 ### 5.1 Stack
 
-- **Framework:** Next.js 15 (App Router, RSC, Turbopack), React 19, TypeScript strict.
+- **Framework:** Next.js 16.2.6 (App Router, RSC, Turbopack default), React 19.2.0, TypeScript strict. Versions are pinned (no caret) in `package.json` so the team and Railway agree byte-for-byte.
+- **Request interception:** `proxy.ts` at the repo root (Next 16 renamed `middleware` → `proxy`; do not reintroduce a `middleware.ts`).
 - **Styling:** Tailwind CSS v4 (CSS-first via `@theme` in `app/globals.css`), no `tailwind.config.*`. OKLCH tokens; never `#fff` or `#000`.
-- **i18n:** `next-intl` with `[locale]` segment, default locale `hi`. Message catalogs in `content/messages/{en,hi}.json`.
+- **i18n:** `next-intl` v4 with `[locale]` segment, default locale `hi`. Message catalogs in `content/messages/{en,hi}.json`.
 - **CMS (phase 5):** Payload CMS embedded under `app/(payload)/admin`, Postgres backend.
 - **Fonts:** Tiro Devanagari Hindi (display) + Hind (body), both bilingual matched cuts. Loaded via `next/font/google` in `lib/fonts.ts`.
 - **Pkg manager:** `pnpm@10` (matches `packageManager` in `package.json`).
@@ -176,7 +177,7 @@ Keep updates surgical — append to the relevant subsection, do not rewrite §0�
 
 | Phase | Status | Notes |
 |---|---|---|
-| 0. Bootstrap | done | Next 15 + TS strict + Tailwind v4 + next-intl + Docker + Railway + test pyramid. |
+| 0. Bootstrap | done | Next 16.2.6 + React 19.2.0 (pinned) + TS strict + Tailwind v4 + next-intl v4 + Docker + Railway + test pyramid. |
 | 1. Design system | partial | OKLCH tokens, fonts, header / footer / locale switcher in place. shadcn primitives not yet added. |
 | 2. Home | partial | Hero, trust strip, departments index, emergency band done in both locales. Still placeholder imagery. |
 | 3. Impeccable critique | pending | Run after phase 2 polish. |
