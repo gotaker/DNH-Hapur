@@ -16,6 +16,7 @@ This file is the operational expansion.
 | Type | `tsconfig.json` | `pnpm typecheck` | yes (inside `test:regression`) |
 | Lint | `eslint.config.mjs` | `pnpm lint` | yes |
 | Unit / component | `tests/unit/**` (Vitest 4 + happy-dom) | `pnpm test`, `pnpm test:watch` | yes |
+| Security floor | `tests/unit/security.test.ts` (Vitest, shells `pnpm why`) | `pnpm test`, `pnpm security` | yes (and `.github/workflows/security.yml` on push/PR/cron) |
 | E2E smoke | `tests/e2e/home.spec.ts` | `pnpm test:e2e` | yes |
 | UX / UI | `tests/e2e/ui-ux.spec.ts` | `pnpm test:ui-ux` | yes (via `test:e2e`) |
 | Adversarial API | `tests/e2e/adversarial.spec.ts` | `pnpm test:adversarial` | yes (via `test:e2e`) |
@@ -42,6 +43,7 @@ Vitest 4 + `@testing-library/react` + happy-dom. Reserved for:
 
 - Pure helpers (`lib/cn.ts`, `lib/href.ts`, `lib/seo.ts`, `lib/search.ts`).
 - Locale parity (`tests/unit/messages.test.ts` — adding an `en.json` key without a matching `hi.json` key fails here).
+- Dependency security floors (`tests/unit/security.test.ts` — see `docs/security.md` for the full agent).
 - Pure components that don't depend on `next-intl` runtime.
 
 Do **not** mock `next-intl`. If a component depends on it, write an E2E

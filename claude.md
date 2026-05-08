@@ -138,6 +138,7 @@ The pyramid is intentional and small. Add tests at the layer that catches the fa
 | SEO + headers | Playwright (`tests/e2e/seo-header.spec.ts`) | Canonical, hreflang, JSON-LD parseability, security headers, `X-Robots-Tag`, robots.txt, sitemap.xml, RSS | Any change to metadata, headers, or routing surface that search bots see. |
 | Accessibility | Playwright + `@axe-core/playwright` (`tests/e2e/a11y.spec.ts`) | Every public page in both locales, desktop + mobile | New top-level route. WCAG 2.2 AA — zero violations is the budget. |
 | Visual regression | Playwright screenshots (`tests/e2e/visual.spec.ts`) | Home page in both locales (extend per phase) | Before locking a design pass; update with `--update-snapshots`. |
+| Security floor | Vitest (`tests/unit/security.test.ts`) | Every patched-version floor + `pnpm.overrides` integrity | Whenever a new advisory lands. See §5.6.2. |
 
 Conventions:
 
@@ -183,6 +184,23 @@ Set in `next.config.mjs` `headers()` and asserted by `tests/e2e/seo-header.spec.
 - Every public locale page emits exactly one `application/ld+json` script (HTML-safe, parseable). `lib/seo.ts` and `components/json-ld.tsx` are the only sources — don't hand-write `<script type="application/ld+json">` inline in a page.
 - Locale pages emit `link[rel=canonical]` plus `hreflang` alternates for `hi-IN`, `en-IN`, `x-default`. Driven by `lib/seo.ts`; new routes pick this up by calling its helpers from `generateMetadata`.
 - `app/sitemap.ts` and `app/robots.ts` are the canonical robots/sitemap surfaces. Sitemap must not contain `/admin` or `/api/`. RSS lives at `/[locale]/news/rss.xml`.
+
+### 5.6.2 Dependency security agent
+
+Three layers, documented in full in `docs/security.md`:
+
+1. **`pnpm audit --audit-level=moderate`** — fails on any moderate, high, or critical advisory in either tree. Run via `pnpm security:audit` locally; `.github/workflows/security.yml` runs it on every push, PR, and nightly at 03:00 UTC.
+2. **`tests/unit/security.test.ts`** — regression test that asserts every patched-version floor (`happy-dom>=20.8.9`, `dompurify>=3.4.0`, `esbuild>=0.25.0`, `postcss>=8.5.10`, `uuid>=11.1.1`) and that the `pnpm.overrides` block in `package.json` still pins each transitive away from its known-vulnerable range. **Adding a floor here is the canonical fix; never `pnpm update` without it.**
+3. **`actions/dependency-review-action`** — PR-only, blocks merge if the diff introduces a dependency at moderate severity or worse that wasn't already on `main`.
+
+Local one-shot agent: `pnpm security` (audit + regression + Dependabot summary via `gh`). Treat critical/high Dependabot alerts as a 24-hour fix window, moderate as 7-day. Don't disable the agent to land a patch; raise the floor.
+
+When a new advisory lands:
+
+1. Bump the direct dep in `package.json`, **or** add/raise an entry in `pnpm.overrides` for transitive deps.
+2. `pnpm install` and verify with `pnpm why <pkg>`.
+3. Append a `FLOORS` entry to `tests/unit/security.test.ts` with the GHSA id.
+4. Run `pnpm security` to confirm clean. Push — Dependabot auto-closes within ~30 min.
 
 ### 5.7 Update protocol for this file
 

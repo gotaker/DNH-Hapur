@@ -135,7 +135,11 @@ The DNS cutover is **the only step that is irreversible without a propagation wi
 - Resolve the axe `target-size` violations on `/en`, `/hi/contact`, and
   `/en/contact` (desktop + mobile). `pnpm test:regression` will fail
   until these are clean — that's the budget.
-- Audit the GitHub Dependabot advisories on the default branch and
-  patch criticals before tagging `v1.0.0`.
 - Replace the Unsplash hero placeholder with consented institutional
   photography (see `imagery-and-identity.md` for the brief).
+
+Dependency advisories are now policed by the security agent
+(`docs/security.md`): nightly cron + `pnpm security` locally + a
+regression test in `tests/unit/security.test.ts`. New advisories that
+land against the lockfile go red on the next push, not at the next
+release.

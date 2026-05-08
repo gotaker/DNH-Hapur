@@ -52,9 +52,11 @@ pnpm test:seo-header     # canonical, hreflang, JSON-LD, security headers, sitem
 pnpm test:a11y           # Playwright + axe-core, WCAG 2.2 AA
 pnpm test:regression     # typecheck + lint + unit + e2e (pre-merge gate)
 pnpm test:all            # alias of test:regression
+pnpm security            # local security agent (audit + regression + Dependabot)
+pnpm security:audit      # raw pnpm audit (moderate+ severity floor)
 ```
 
-E2E, ux/ui, a11y, and seo-header suites iterate both locales and run on desktop + Pixel 7. Visual regression snapshots are committed under `tests/e2e/*-snapshots/`; update with `pnpm test:e2e --update-snapshots`. See [`docs/testing.md`](docs/testing.md) for the full regression playbook.
+E2E, ux/ui, a11y, and seo-header suites iterate both locales and run on desktop + Pixel 7. Visual regression snapshots are committed under `tests/e2e/*-snapshots/`; update with `pnpm test:e2e --update-snapshots`. See [`docs/testing.md`](docs/testing.md) for the full regression playbook and [`docs/security.md`](docs/security.md) for the dependency security agent.
 
 ## Project layout
 
@@ -102,7 +104,7 @@ components/                          site-header, site-footer, locale-switcher, 
 content/
   data/                              Typed bilingual content fixtures (departments, doctors, programs, news)
   messages/                          en.json, hi.json (parity-tested)
-docs/                                critique-phase-3.md, imagery-and-identity.md, launch-runbook.md, testing.md
+docs/                                critique-phase-3.md, imagery-and-identity.md, launch-runbook.md, testing.md, security.md
 i18n/                                routing, request config
 lib/                                 fonts, site metadata, cn(), seo helpers, search
 payload/                             Payload collection + global definitions
@@ -110,6 +112,9 @@ payload.config.ts                    Payload root config
 scripts/
   seed.ts                            Seeder from content/data/* into Payload
   backup-postgres.sh                 pg_dump cron helper
+  security-check.sh                  Local security agent (pnpm security)
+.github/workflows/
+  security.yml                       pnpm audit + dependency-review + Dependabot summary
 tests/unit/                          Vitest specs
 tests/e2e/                           Playwright specs (home, a11y, visual, ui-ux, adversarial, seo-header)
 Dockerfile                           multi-stage: deps → dev / builder → runner
@@ -159,6 +164,12 @@ Set in `next.config.mjs` and asserted by `tests/e2e/seo-header.spec.ts`:
 - Private routes (`/admin/*`, `/api/*`) additionally send `X-Robots-Tag: noindex, nofollow`.
 - Each locale page emits exactly one parseable `application/ld+json` script plus `canonical` and `hreflang` alternates (`hi-IN`, `en-IN`, `x-default`). Driven by `lib/seo.ts` + `components/json-ld.tsx`; never hand-write inline JSON-LD.
 - `sitemap.xml`, `robots.txt`, and `/[locale]/news/rss.xml` are the canonical bot surfaces. The sitemap excludes `/admin` and `/api/`.
+
+Dependency security is enforced by three independent layers (see [`docs/security.md`](docs/security.md)):
+
+- `pnpm audit --audit-level=moderate` (CI + `pnpm security:audit`).
+- `tests/unit/security.test.ts` — regression test that asserts every patched-version floor and the integrity of the `pnpm.overrides` block in `package.json`.
+- `actions/dependency-review-action` on every PR (blocks moderate+ regressions).
 
 ## Contributing rules
 

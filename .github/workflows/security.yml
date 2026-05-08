@@ -1,0 +1,89 @@
+name: Security audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Daily at 03:00 UTC. Catches advisories that landed against deps
+    # already shipped — Dependabot opens an alert, this surface fails CI
+    # the next nightly so a maintainer notices before next release.
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: read
+  pull-requests: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pnpm-audit:
+    name: pnpm audit (fail on moderate+)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.2
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Run pnpm audit
+        run: pnpm audit --audit-level=moderate --prod --dev
+
+      - name: Run security-floor regression test
+        run: pnpm test -- tests/unit/security.test.ts
+
+  dependency-review:
+    name: Dependency review (PR-only)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Block introduction of vulnerable dependencies
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: moderate
+          comment-summary-in-pr: on-failure
+
+  dependabot-alert-summary:
+    name: Open Dependabot alerts (informational)
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Summarise open alerts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          {
+            echo "## Open Dependabot alerts"
+            echo ""
+            if ! command -v gh >/dev/null; then
+              echo "gh CLI not available; skipping."
+              exit 0
+            fi
+            gh api "repos/${GITHUB_REPOSITORY}/dependabot/alerts?state=open&per_page=100" \
+              --paginate \
+              -q '.[] | "- [\(.security_advisory.severity | ascii_upcase)] \(.dependency.package.name) \(.security_vulnerability.vulnerable_version_range) → \(.security_advisory.ghsa_id)"' \
+              || echo "No open alerts (or no permission)."
+          } >> "$GITHUB_STEP_SUMMARY"
