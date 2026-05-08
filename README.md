@@ -126,7 +126,7 @@ vitest.config.ts                     happy-dom, alias @ → ./
 
 ## Design system at a glance
 
-OKLCH tokens in `app/globals.css` `@theme`. Hard rules in `claude.md` §5.6.
+OKLCH tokens in `app/globals.css` `@theme`. Hard rules in `CLAUDE.md` §5.6.
 
 - **Surface:** warm-tinted bone, never `#fff`.
 - **Ink:** deep blue-black, never `#000`.
@@ -154,7 +154,7 @@ Do not commit secrets. `.env.example` is the source of truth for required keys.
 
 ### Build phase ledger
 
-See `claude.md` §5.8.
+See `CLAUDE.md` §5.8.
 
 ## Security and SEO posture
 
@@ -173,7 +173,7 @@ Dependency security is enforced by three independent layers (see [`docs/security
 
 ## Contributing rules
 
-Read `claude.md` end to end before editing. Key constraints:
+Read `CLAUDE.md` end to end before editing. Key constraints:
 
 - Both locales are first-class. Adding an `en.json` key without the matching `hi.json` key fails CI (`tests/unit/messages.test.ts`).
 - E2E, ux/ui, a11y, and seo-header suites must iterate both locales.

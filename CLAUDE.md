@@ -88,6 +88,7 @@ A bilingual (Hindi default, English secondary) institutional site for Dev Nandin
 - **Analytics:** Plausible (`components/analytics.tsx`), gated by `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`. Omit the env var to disable the script entirely — no cookies, no banner needed.
 - **Fonts:** Tiro Devanagari Hindi (display) + Hind (body), both bilingual matched cuts. Loaded via `next/font/google` in `lib/fonts.ts`.
 - **Pkg manager:** `pnpm@10` (matches `packageManager` in `package.json`).
+- **Path aliases:** `@/*` → repo root, `@payload-config` → `./payload.config.ts` (declared in `tsconfig.json`). Prefer aliased imports over deep relative paths for cross-cutting modules (`@/lib/...`, `@/components/...`, `@/i18n/...`).
 
 ### 5.2 Local development — Docker
 
@@ -152,6 +153,14 @@ Conventions:
 - Vitest is pinned to `4.1.5` and requires `vite@^8` plus `@vitejs/plugin-react@^6` as direct devDeps to satisfy its `./module-runner` / `./internal` subpath exports. Don't "clean up" the explicit `vite` entry — Vitest 4 won't resolve without it.
 - The adversarial oversized-query case must accept `200 | 414 | 431` **and** an `ECONNRESET`. That's the runtime/proxy boundary refusing the request — bounded rejection, not a server crash. Don't tighten the assertion.
 - When adding a new E2E spec, add it to the `scripts` block in `package.json` if it deserves a narrow command, and ensure the default `playwright test` (run via `test:e2e` / `test:regression`) still picks it up.
+
+Running a single test:
+
+- Single Vitest file: `pnpm test tests/unit/messages.test.ts`
+- Single Vitest by name: `pnpm test -t "locale parity"`
+- Single Playwright spec: `pnpm exec playwright test tests/e2e/home.spec.ts`
+- Filter Playwright by title: append `-g "redirects"`; restrict device project: `--project="Mobile Chrome"`
+- Update visual snapshots after a deliberate design change: `pnpm test:e2e --update-snapshots`
 
 ### 5.5 Bilingual rules
 

@@ -6,7 +6,7 @@ class of failure that would slip past everything else. This document
 explains *what* each suite covers, *when* to extend it, and *how* to run
 it cheaply.
 
-The canonical conventions live in `claude.md` §5.4 (test methodology).
+The canonical conventions live in `CLAUDE.md` §5.4 (test methodology).
 This file is the operational expansion.
 
 ## 1. Layers at a glance
@@ -157,7 +157,7 @@ Playwright runs against a `next start` server on port `3100` (see
 4. If the suite deserves a narrow command, add it to `package.json`
    `scripts` (`test:<suite>`); ensure the default `playwright test`
    still picks it up so `test:regression` covers it automatically.
-5. Update `claude.md` §5.4 if the suite introduces a new convention or
+5. Update `CLAUDE.md` §5.4 if the suite introduces a new convention or
    tolerance (e.g. accepting `ECONNRESET` on oversized requests).
 
 ## 5. Pre-merge checklist

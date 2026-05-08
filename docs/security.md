@@ -2,12 +2,12 @@
 
 This document describes how this codebase stays ahead of dependency
 advisories and how the agent enforces it. The combined surface — local
-script, regression test, and CI workflow — is what `claude.md` calls
+script, regression test, and CI workflow — is what `CLAUDE.md` calls
 the **security agent**.
 
 The runtime security posture (response headers, `X-Robots-Tag`,
 JSON-LD safety, robots/sitemap/RSS contracts) lives in
-[`testing.md`](./testing.md) §2.5 and `claude.md` §5.6.1. This file is
+[`testing.md`](./testing.md) §2.5 and `CLAUDE.md` §5.6.1. This file is
 about the **dependency** surface.
 
 ## 1. Layers
