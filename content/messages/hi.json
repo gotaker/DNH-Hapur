@@ -1,0 +1,71 @@
+{
+  "site": {
+    "name": "देव नंदिनी अस्पताल और चिकित्सा महाविद्यालय",
+    "shortName": "देव नंदिनी",
+    "tagline": "हापुड़ की चिकित्सकीय धरोहर। उत्तरी भारत के लिए एक तृतीयक देखभाल और शिक्षण संस्थान।",
+    "abbreviation": "DNH"
+  },
+  "nav": {
+    "patients": "मरीज़ और परिजन",
+    "academics": "चिकित्सा महाविद्यालय",
+    "institution": "संस्थान",
+    "about": "हमारे बारे में",
+    "departments": "विभाग",
+    "doctors": "चिकित्सक खोजें",
+    "centers": "उत्कृष्टता केंद्र",
+    "programs": "पाठ्यक्रम",
+    "admissions": "प्रवेश",
+    "faculty": "संकाय",
+    "research": "अनुसंधान",
+    "news": "समाचार",
+    "careers": "करियर",
+    "contact": "संपर्क",
+    "emergency": "आपातकाल",
+    "skipToContent": "मुख्य सामग्री पर जाएँ"
+  },
+  "actions": {
+    "bookAppointment": "अपॉइंटमेंट लें",
+    "payBills": "बिल भुगतान",
+    "labReports": "जाँच रिपोर्ट",
+    "emergency24x7": "आपातकाल · 24x7",
+    "callNow": "अभी कॉल करें",
+    "whatsapp": "व्हाट्सएप",
+    "viewAll": "सभी देखें",
+    "readMore": "और पढ़ें",
+    "switchLocale": "English"
+  },
+  "home": {
+    "heroEyebrow": "हापुड़ · उत्तर प्रदेश · 2014 से",
+    "heroHeadline": "गंभीर परिस्थिति में, गंभीर देखभाल।",
+    "heroBody": "देव नंदिनी अस्पताल पश्चिमी उत्तर प्रदेश का एक तृतीयक देखभाल केंद्र और चिकित्सा महाविद्यालय है। चौबीसों घंटे आपातकाल, क्रिटिकल केयर, और 30 से अधिक विशेषज्ञताएँ। एक छत के नीचे।",
+    "heroPrimaryCta": "अपॉइंटमेंट लें",
+    "heroSecondaryCta": "विभाग देखें",
+    "trustEyebrow": "मान्यता और संबद्धता",
+    "departmentsEyebrow": "नैदानिक विभाग",
+    "departmentsHeadline": "तीस से अधिक विशेषज्ञताएँ। एक संस्थान।",
+    "centersEyebrow": "उत्कृष्टता केंद्र",
+    "centersHeadline": "जहाँ हमारी विशेषज्ञता गहरी जाती है।",
+    "doctorsEyebrow": "चिकित्सक",
+    "doctorsHeadline": "उन हाथों से मिलिए जो आपकी देखभाल करेंगे।",
+    "academicsEyebrow": "चिकित्सा महाविद्यालय",
+    "academicsHeadline": "अगली पीढ़ी के चिकित्सकों का प्रशिक्षण।",
+    "newsEyebrow": "समाचार और शिविर",
+    "emergencyHeadline": "आपातकाल कभी समय नहीं देखता।",
+    "emergencyBody": "हमारी आपातकालीन सेवा 365 दिन, 24 घंटे उपलब्ध है। एक कॉल पर एम्बुलेंस।"
+  },
+  "footer": {
+    "address": "रेलवे क्रॉसिंग के पास, गढ़ रोड, हापुड़, उत्तर प्रदेश",
+    "phonesLabel": "फ़ोन",
+    "emailLabel": "ईमेल",
+    "patientsHeading": "मरीज़ और परिजन",
+    "academicsHeading": "चिकित्सा महाविद्यालय",
+    "institutionHeading": "संस्थान",
+    "copyright": "© {year} देव नंदिनी अस्पताल। सर्वाधिकार सुरक्षित।",
+    "credits": "हापुड़, भारत में निर्मित।"
+  },
+  "common": {
+    "loading": "लोड हो रहा है…",
+    "error": "एक त्रुटि हुई।",
+    "comingSoon": "जल्द आ रहा है।"
+  }
+}

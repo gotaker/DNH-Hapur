@@ -1,0 +1,50 @@
+# Local development stack.
+# Mirrors the prod environment shape (Node + Postgres) but mounts the source
+# tree for hot reload and runs the `dev` Dockerfile target.
+
+services:
+  web:
+    build:
+      context: .
+      target: dev
+    container_name: dnh-web
+    command: pnpm dev
+    ports:
+      - '3000:3000'
+    volumes:
+      # Bind-mount the source so file edits trigger Turbopack HMR.
+      - .:/app
+      # Anonymous volumes for things we never want host-shadowed.
+      - /app/node_modules
+      - /app/.next
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      DATABASE_URI: postgres://dnh:dnh@db:5432/dnh
+      # Same secret only in dev; rotated per-environment in Railway.
+      PAYLOAD_SECRET: dev-only-not-a-real-secret
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    container_name: dnh-db
+    environment:
+      POSTGRES_USER: dnh
+      POSTGRES_PASSWORD: dnh
+      POSTGRES_DB: dnh
+    ports:
+      - '5432:5432'
+    volumes:
+      - dnh-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U dnh -d dnh']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  dnh-db-data:

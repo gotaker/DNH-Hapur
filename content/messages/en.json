@@ -1,0 +1,71 @@
+{
+  "site": {
+    "name": "Dev Nandini Hospital & Medical College",
+    "shortName": "Dev Nandini",
+    "tagline": "A medical institution in Hapur. Tertiary care and teaching for North India.",
+    "abbreviation": "DNH"
+  },
+  "nav": {
+    "patients": "Patients & Visitors",
+    "academics": "Medical College",
+    "institution": "The Institution",
+    "about": "About",
+    "departments": "Departments",
+    "doctors": "Find a Doctor",
+    "centers": "Centers of Excellence",
+    "programs": "Programs",
+    "admissions": "Admissions",
+    "faculty": "Faculty",
+    "research": "Research",
+    "news": "News",
+    "careers": "Careers",
+    "contact": "Contact",
+    "emergency": "Emergency",
+    "skipToContent": "Skip to main content"
+  },
+  "actions": {
+    "bookAppointment": "Book Appointment",
+    "payBills": "Pay Bills",
+    "labReports": "Lab Reports",
+    "emergency24x7": "Emergency · 24x7",
+    "callNow": "Call now",
+    "whatsapp": "WhatsApp",
+    "viewAll": "View all",
+    "readMore": "Read more",
+    "switchLocale": "हिन्दी"
+  },
+  "home": {
+    "heroEyebrow": "Hapur · Uttar Pradesh · Since 2014",
+    "heroHeadline": "Serious care, when it matters.",
+    "heroBody": "Dev Nandini Hospital is a tertiary care center and medical college serving Western Uttar Pradesh. Round-the-clock emergency, critical care, and over thirty specialties. Under one roof.",
+    "heroPrimaryCta": "Book an appointment",
+    "heroSecondaryCta": "Explore departments",
+    "trustEyebrow": "Accreditations and affiliations",
+    "departmentsEyebrow": "Clinical departments",
+    "departmentsHeadline": "More than thirty specialties. One institution.",
+    "centersEyebrow": "Centers of excellence",
+    "centersHeadline": "Where our expertise runs deepest.",
+    "doctorsEyebrow": "Physicians",
+    "doctorsHeadline": "Meet the hands that will look after you.",
+    "academicsEyebrow": "Medical college",
+    "academicsHeadline": "Training the next generation of physicians.",
+    "newsEyebrow": "News and camps",
+    "emergencyHeadline": "Emergencies do not keep time.",
+    "emergencyBody": "Our emergency service is available 365 days, 24 hours. An ambulance is one call away."
+  },
+  "footer": {
+    "address": "Near Railway Crossing, Garh Road, Hapur, Uttar Pradesh",
+    "phonesLabel": "Phone",
+    "emailLabel": "Email",
+    "patientsHeading": "Patients & Visitors",
+    "academicsHeading": "Medical College",
+    "institutionHeading": "The Institution",
+    "copyright": "© {year} Dev Nandini Hospital. All rights reserved.",
+    "credits": "Built in Hapur, India."
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong.",
+    "comingSoon": "Coming soon."
+  }
+}
