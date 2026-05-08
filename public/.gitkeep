@@ -1,0 +1,2 @@
+# Reserved for static assets served at the site root.
+# Required by the Dockerfile `COPY --from=builder /app/public ./public` step.

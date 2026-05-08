@@ -7,6 +7,7 @@ import { fontVariables } from '@/lib/fonts';
 import { site } from '@/lib/site';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { Analytics } from '@/components/analytics';
 import '../globals.css';
 
 export function generateStaticParams() {
@@ -79,6 +80,7 @@ export default async function LocaleLayout({
           <main id="main">{children}</main>
           <SiteFooter />
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );

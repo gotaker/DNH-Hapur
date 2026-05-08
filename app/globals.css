@@ -65,6 +65,77 @@
   --container-content: 72rem;
   --container-narrow: 48rem;
   --container-wide: 88rem;
+
+  /* Motion — restrained. Hospitals do not perform. */
+  --animate-accordion-down: accordion-down 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-accordion-up: accordion-up 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fade-in: fade-in 240ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  @keyframes accordion-down {
+    from {
+      height: 0;
+    }
+    to {
+      height: var(--radix-accordion-content-height);
+    }
+  }
+  @keyframes accordion-up {
+    from {
+      height: var(--radix-accordion-content-height);
+    }
+    to {
+      height: 0;
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   Print stylesheet
+   Phase 7. The emergency and contact pages are print-friendly so a family
+   member can print them at home. Headers, footers, and any non-essential
+   chrome are hidden; ink colours collapse to high-contrast for laser
+   printing.
+   ------------------------------------------------------------------------- */
+@media print {
+  :root {
+    --color-surface: white;
+    --color-surface-mute: white;
+    --color-surface-deep: white;
+    --color-ink: black;
+    --color-ink-mute: black;
+    --color-ink-soft: #555;
+    --color-brand: black;
+    --color-brand-deep: black;
+    --color-rule: #888;
+  }
+  header,
+  footer,
+  nav,
+  [data-print='hide'] {
+    display: none !important;
+  }
+  a[href]::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.75rem;
+    color: #555;
+  }
+  a[href^='tel:']::after,
+  a[href^='mailto:']::after {
+    content: '';
+  }
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
 }
 
 /* Page chrome. */

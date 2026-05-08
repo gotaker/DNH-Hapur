@@ -1,6 +1,9 @@
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { LocaleSwitcher } from './locale-switcher';
+import { MobileNav } from './mobile-nav';
+import { Wordmark } from './wordmark';
+import { Button } from './ui/button';
 import { site } from '@/lib/site';
 
 export function SiteHeader() {
@@ -15,8 +18,9 @@ export function SiteHeader() {
   ];
 
   return (
-    <header className="bg-surface border-rule border-b">
-      {/* Utility row — emergency-first, locale switcher, contact */}
+    <header className="bg-surface border-rule sticky top-0 z-[60] isolate border-b">
+      {/* Utility row — emergency-first, locale switcher, contact.
+          Sticky header is solid (not glass) to match the institutional register. */}
       <div className="bg-brand-deep text-surface">
         <div className="container-wide flex items-center justify-between gap-4 py-2 text-xs">
           <a
@@ -31,24 +35,21 @@ export function SiteHeader() {
             <a href={`mailto:${site.email}`} className="hover:text-accent hidden sm:inline">
               {site.email}
             </a>
+            <Link href="/search" className="hover:text-accent inline">
+              {t('actions.search')}
+            </Link>
             <LocaleSwitcher />
           </div>
         </div>
       </div>
 
       {/* Brand row + nav */}
-      <div className="container-wide flex flex-wrap items-end justify-between gap-6 py-5">
-        <Link href="/" className="group inline-flex flex-col">
-          <span className="eyebrow text-brand">{t('site.shortName')}</span>
-          <span
-            className="font-display text-ink mt-0.5 text-2xl leading-none"
-            aria-label={t('site.name')}
-          >
-            {t('site.shortName')}
-          </span>
+      <div className="container-wide flex flex-wrap items-center justify-between gap-6 py-5">
+        <Link href="/" aria-label={t('site.name')} className="group">
+          <Wordmark size="md" tone="ink" showFull />
         </Link>
 
-        <nav aria-label="Primary" className="flex flex-wrap items-center gap-x-7 gap-y-2">
+        <nav aria-label="Primary" className="hidden lg:flex flex-wrap items-center gap-x-7 gap-y-2">
           {primary.map((item) => (
             <Link
               key={item.href}
@@ -58,13 +59,12 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <Link
-            href="/contact"
-            className="bg-brand text-surface hover:bg-brand-deep ml-2 inline-flex items-center px-4 py-2 text-sm font-medium tracking-wide transition-colors"
-          >
-            {t('actions.bookAppointment')}
-          </Link>
+          <Button asChild size="md" className="ml-2">
+            <Link href="/contact">{t('actions.bookAppointment')}</Link>
+          </Button>
         </nav>
+
+        <MobileNav primary={primary} appointmentLabel={t('actions.bookAppointment')} />
       </div>
     </header>
   );

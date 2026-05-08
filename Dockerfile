@@ -15,10 +15,12 @@ RUN corepack enable && corepack prepare pnpm@${PNPM_VERSION} --activate \
 WORKDIR /app
 
 # ---------- Dependencies (cached) ----------
+# No --mount=type=cache here: Railway's Metal builder rejects unprefixed
+# BuildKit cache mount ids. The normal layer cache (keyed on package.json
+# + pnpm-lock.yaml) still gives us reproducibly fast rebuilds locally.
 FROM base AS deps
 COPY package.json pnpm-lock.yaml* ./
-RUN --mount=type=cache,id=pnpm-store,target=/root/.local/share/pnpm/store \
-    pnpm install --frozen-lockfile || pnpm install
+RUN pnpm install --frozen-lockfile || pnpm install
 
 # ---------- Dev (used by docker-compose for `pnpm dev`) ----------
 FROM base AS dev

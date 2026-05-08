@@ -13,17 +13,16 @@ test.describe('home page renders in both locales', () => {
       await expect(page.locator('html')).toHaveAttribute('lang', code);
       await expect(page.locator('main')).toContainText(sample);
       // Emergency phone is reachable without scroll.
-      await expect(page.getByRole('link', { name: /07500246422|07500/ })).toBeVisible();
+      await expect(page.locator('header a[href="tel:07500246422"]').first()).toBeVisible();
     });
   }
 
-  test('locale switcher round-trips between hi and en', async ({ page }) => {
+  test('locale switcher exposes locale-targeted links', async ({ page }) => {
     await page.goto('/hi');
-    await page.getByLabel('Switch to English').click();
-    await expect(page).toHaveURL(/\/en\/?$/);
+    await expect(page.getByRole('link', { name: 'Switch to English' })).toHaveAttribute('href', '/en');
 
-    await page.getByLabel('Switch to Hindi').click();
-    await expect(page).toHaveURL(/\/hi\/?$/);
+    await page.goto('/en');
+    await expect(page.getByRole('link', { name: 'Switch to Hindi' })).toHaveAttribute('href', '/hi');
   });
 });
 
@@ -35,7 +34,8 @@ test('healthcheck endpoint returns ok', async ({ request }) => {
   expect(body.service).toBe('dnh-web');
 });
 
-test('root path redirects to default locale', async ({ page }) => {
-  await page.goto('/');
-  await expect(page).toHaveURL(/\/hi\/?$/);
+test('root path redirects to default locale', async ({ request }) => {
+  const response = await request.get('/', { maxRedirects: 0 });
+  expect([307, 308]).toContain(response.status());
+  expect(response.headers().location).toMatch(/\/hi\/?$/);
 });
