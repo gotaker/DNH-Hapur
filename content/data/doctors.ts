@@ -4,6 +4,13 @@ import type { Doctor } from './types';
  * Doctors are seeded from the public roster on dnhhapur.com. Bilingual
  * names are transliterated; final spellings should be reviewed by the
  * institution before launch.
+ *
+ * The last three entries (`govind-singh`, `s-suvarna`, `shudanshu`)
+ * carry the legacy portrait but the institution did not publish their
+ * specialty, qualifications, department, OPD timings, or bio. Those
+ * fields are flagged with "pending review" placeholders so the seed
+ * doubles as a checklist — replace each placeholder with confirmed
+ * institutional data before launch.
  */
 export const doctors: Doctor[] = [
   {
@@ -18,8 +25,7 @@ export const doctors: Doctor[] = [
       en: 'Dr. Vimlesh Sharma leads the FOGSI-recognised infertility centre at Dev Nandini Hospital and supervises the institution\u2019s infertility training course.',
       hi: 'डॉ. विमलेश शर्मा देव नंदिनी अस्पताल के FOGSI-मान्यता प्राप्त बाँझपन केंद्र का नेतृत्व करती हैं और संस्थान के बाँझपन प्रशिक्षण पाठ्यक्रम का पर्यवेक्षण करती हैं।',
     },
-    image:
-      'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&w=800&q=80',
+    image: '/images/doctors/vimlesh-sharma.jpg',
   },
   {
     slug: 'sanjay-rai',
@@ -33,8 +39,7 @@ export const doctors: Doctor[] = [
       en: 'Dr. Sanjay Rai performs cranial and spinal neurosurgery and leads the institution\u2019s acute stroke pathway.',
       hi: 'डॉ. संजय राय क्रेनियल और स्पाइनल न्यूरोसर्जरी करते हैं और संस्थान के तीव्र स्ट्रोक मार्ग का नेतृत्व करते हैं।',
     },
-    image:
-      'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&w=800&q=80',
+    image: '/images/doctors/sanjay-rai.jpg',
   },
   {
     slug: 'pramod-teotia',
@@ -48,6 +53,7 @@ export const doctors: Doctor[] = [
       en: 'Consultant cardiologist with a focus on coronary intervention and heart-failure management.',
       hi: 'कोरोनरी हस्तक्षेप और हृदय विफलता प्रबंधन पर ध्यान केंद्रित करने वाले परामर्शदाता हृदय रोग विशेषज्ञ।',
     },
+    image: '/images/doctors/pramod-teotia.jpg',
   },
   {
     slug: 'shuchi-taneja',
@@ -61,6 +67,7 @@ export const doctors: Doctor[] = [
       en: 'Heads the Level-III neonatal intensive care unit and the developmental follow-up clinic.',
       hi: 'लेवल-III नवजात गहन देखभाल इकाई और विकासात्मक अनुवर्ती क्लीनिक का नेतृत्व करती हैं।',
     },
+    image: '/images/doctors/shuchi-taneja.jpg',
   },
   {
     slug: 'sp-singh',
@@ -74,6 +81,7 @@ export const doctors: Doctor[] = [
       en: 'Senior orthopaedic surgeon focused on knee and hip replacement and trauma reconstruction.',
       hi: 'घुटने और कूल्हे के प्रत्यारोपण और आघात पुनर्निर्माण पर केंद्रित वरिष्ठ आर्थोपेडिक सर्जन।',
     },
+    image: '/images/doctors/s-p-singh.jpg',
   },
   {
     slug: 'jeevotam-narang',
@@ -87,6 +95,7 @@ export const doctors: Doctor[] = [
       en: 'General and laparoscopic surgeon with high-volume experience in cholecystectomy and hernia repair.',
       hi: 'पित्ताशय शल्य चिकित्सा और हर्निया मरम्मत में उच्च-मात्रा के अनुभव के साथ सामान्य और लेप्रोस्कोपिक सर्जन।',
     },
+    image: '/images/doctors/jeevotam-narang.jpg',
   },
   {
     slug: 'hariom-singh',
@@ -100,6 +109,7 @@ export const doctors: Doctor[] = [
       en: 'Internist with primary interests in diabetes, hypertension, and elderly care.',
       hi: 'मधुमेह, उच्च रक्तचाप और वृद्धावस्था देखभाल में मुख्य रुचि वाले आंतरिक चिकित्सक।',
     },
+    image: '/images/doctors/hariom-singh.jpg',
   },
   {
     slug: 'praveen-kumar',
@@ -113,6 +123,7 @@ export const doctors: Doctor[] = [
       en: 'Performs phacoemulsification cataract surgery and runs the diabetic retinopathy screening clinic.',
       hi: 'फेकोइमल्सीफिकेशन मोतियाबिंद शल्य चिकित्सा करते हैं और मधुमेह रेटिनोपैथी जाँच क्लीनिक चलाते हैं।',
     },
+    image: '/images/doctors/praveen-kumar.jpg',
   },
   {
     slug: 'shiv-kumar',
@@ -126,6 +137,7 @@ export const doctors: Doctor[] = [
       en: 'Treats common and chronic skin conditions including eczema, psoriasis, and pigmentation.',
       hi: 'एक्जिमा, सोरायसिस और रंजकता सहित सामान्य और दीर्घकालिक त्वचा स्थितियों का उपचार करते हैं।',
     },
+    image: '/images/doctors/shiv-kumar.jpg',
   },
   {
     slug: 'shyam-kumar',
@@ -139,6 +151,7 @@ export const doctors: Doctor[] = [
       en: 'Performs diagnostic and therapeutic upper GI endoscopy, colonoscopy, and ERCP.',
       hi: 'निदान और उपचारात्मक अपर जीआई एंडोस्कोपी, कोलोनोस्कोपी और ERCP करते हैं।',
     },
+    image: '/images/doctors/shyam-kumar.jpg',
   },
   {
     slug: 'saroo-singh',
@@ -152,6 +165,7 @@ export const doctors: Doctor[] = [
       en: 'High-risk pregnancy specialist with a focus on painless delivery and adolescent gynaecology.',
       hi: 'दर्द-रहित प्रसव और किशोर स्त्री रोग पर ध्यान केंद्रित करने वाली उच्च-जोखिम गर्भावस्था विशेषज्ञ।',
     },
+    image: '/images/doctors/saroo-singh.jpg',
   },
   {
     slug: 'anubhav-kirtikar',
@@ -165,6 +179,67 @@ export const doctors: Doctor[] = [
       en: 'Heads the multi-disciplinary intensive care unit and the institutional sepsis pathway.',
       hi: 'बहु-विषयक गहन देखभाल इकाई और संस्थागत सेप्सिस मार्ग का नेतृत्व करते हैं।',
     },
+    image: '/images/doctors/anubhav-kirtikar.jpg',
+  },
+  {
+    slug: 'govind-singh',
+    name: { en: 'Dr. Govind Singh', hi: 'डॉ. गोविंद सिंह' },
+    qualifications: 'Qualifications pending institutional review',
+    specialty: {
+      en: 'Specialty pending institutional review',
+      hi: 'विशेषज्ञता संस्थागत समीक्षा हेतु लंबित',
+    },
+    departments: [],
+    languages: { en: [], hi: [] },
+    opdDays: {
+      en: 'OPD timings pending institutional review',
+      hi: 'OPD समय संस्थागत समीक्षा हेतु लंबित',
+    },
+    bio: {
+      en: 'Biographical note pending institutional review.',
+      hi: 'जीवनवृत्त संस्थागत समीक्षा हेतु लंबित।',
+    },
+    image: '/images/doctors/govind-singh.jpg',
+  },
+  {
+    slug: 's-suvarna',
+    name: { en: 'Dr. S. Suvarna', hi: 'डॉ. एस. सुवर्णा' },
+    qualifications: 'Qualifications pending institutional review',
+    specialty: {
+      en: 'Specialty pending institutional review',
+      hi: 'विशेषज्ञता संस्थागत समीक्षा हेतु लंबित',
+    },
+    departments: [],
+    languages: { en: [], hi: [] },
+    opdDays: {
+      en: 'OPD timings pending institutional review',
+      hi: 'OPD समय संस्थागत समीक्षा हेतु लंबित',
+    },
+    bio: {
+      en: 'Biographical note pending institutional review.',
+      hi: 'जीवनवृत्त संस्थागत समीक्षा हेतु लंबित।',
+    },
+    image: '/images/doctors/s-suvarna.jpg',
+  },
+  {
+    slug: 'shudanshu',
+    name: { en: 'Dr. Shudanshu', hi: 'डॉ. शुदांशु' },
+    qualifications: 'Qualifications pending institutional review',
+    specialty: {
+      en: 'Specialty pending institutional review',
+      hi: 'विशेषज्ञता संस्थागत समीक्षा हेतु लंबित',
+    },
+    departments: [],
+    languages: { en: [], hi: [] },
+    opdDays: {
+      en: 'OPD timings pending institutional review',
+      hi: 'OPD समय संस्थागत समीक्षा हेतु लंबित',
+    },
+    bio: {
+      en: 'Biographical note pending institutional review.',
+      hi: 'जीवनवृत्त संस्थागत समीक्षा हेतु लंबित।',
+    },
+    image: '/images/doctors/shudanshu.jpg',
   },
 ];
 

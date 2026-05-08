@@ -1,6 +1,9 @@
+import Image from 'next/image';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { PageHeader } from '@/components/page-header';
 import { site } from '@/lib/site';
+import { leadership } from '@/content/data/leadership';
+import { pick } from '@/content/data/types';
 import type { Locale } from '@/i18n/routing';
 
 export default async function AboutPage({ params }: { params: Promise<{ locale: Locale }> }) {
@@ -129,6 +132,46 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
               </li>
             ))}
           </ol>
+        </div>
+      </section>
+
+      <section className="bg-surface">
+        <div className="container-wide py-section">
+          <header className="grid gap-6 lg:grid-cols-[1fr_1.6fr] lg:items-end">
+            <div>
+              <span className="eyebrow text-brand">{t('Leadership', 'नेतृत्व')}</span>
+              <h2 className="font-display text-ink mt-3 text-3xl">
+                {t('Trustees and management', 'न्यासी और प्रबंधन')}
+              </h2>
+            </div>
+            <p className="text-ink-mute max-w-prose text-base leading-relaxed">
+              {t(
+                'The trust and management group that stewards Dev Nandini Hospital and Medical College.',
+                'देव नंदिनी अस्पताल और चिकित्सा महाविद्यालय का संचालन करने वाला न्यास एवं प्रबंधन समूह।',
+              )}
+            </p>
+          </header>
+          <ul className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-5">
+            {leadership.map((m) => (
+              <li key={m.slug} className="flex flex-col">
+                <div className="bg-surface-deep relative aspect-[4/5] w-full overflow-hidden">
+                  <Image
+                    src={m.image}
+                    alt=""
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 20vw"
+                    className="object-cover grayscale"
+                  />
+                </div>
+                <h3 className="font-display text-ink mt-4 text-lg leading-snug">
+                  {pick(m.name, locale)}
+                </h3>
+                {m.role ? (
+                  <p className="text-ink-mute mt-1 text-sm">{pick(m.role, locale)}</p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     </>
