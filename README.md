@@ -15,8 +15,11 @@ Bilingual institutional site for **Dev Nandini Hospital and Medical College**, H
 | Styling | Tailwind CSS v4 (CSS-first `@theme` in `app/globals.css`) |
 | i18n | `next-intl` v4, `[locale]` segment, default `hi`, request interception via `proxy.ts` |
 | Fonts | Tiro Devanagari Hindi (display) + Hind (body), bilingual matched cuts |
-| CMS (phase 5) | Payload CMS, Postgres backend |
-| Tests | Vitest + happy-dom (unit), Playwright + axe-core (E2E + a11y) |
+| CMS | Payload CMS 3.84 (mounted at `/admin`), Postgres backend, localized EN/HI fields |
+| Search | In-memory bilingual fuzzy search (`lib/search.ts`) → `/api/search`, `/[locale]/search` |
+| Email | Resend transactional (with dev console fallback) for the contact form |
+| Analytics | Plausible (gated by `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`) |
+| Tests | Vitest + happy-dom (unit), Playwright + axe-core (smoke, ux/ui, adversarial, seo-header, a11y, visual) |
 | Container | Multi-stage Dockerfile (Node 22 alpine, standalone Next output) |
 | Hosting | Railway (prod), Docker Compose (local dev) |
 | Pkg manager | pnpm 10 |
@@ -40,14 +43,18 @@ pnpm dev
 ## Tests
 
 ```bash
-pnpm test             # Vitest unit + component
+pnpm test                # Vitest unit + component
 pnpm test:watch
-pnpm test:e2e         # Playwright (desktop + mobile, both locales)
-pnpm test:a11y        # Playwright + axe-core, WCAG 2.2 AA
-pnpm test:all         # typecheck + lint + unit + e2e (pre-merge gate)
+pnpm test:e2e            # Playwright (desktop + mobile, both locales)
+pnpm test:ui-ux          # Skip link, header, mobile nav, contact form, search
+pnpm test:adversarial    # Method hardening, malformed input, oversized queries
+pnpm test:seo-header     # canonical, hreflang, JSON-LD, security headers, sitemap, RSS
+pnpm test:a11y           # Playwright + axe-core, WCAG 2.2 AA
+pnpm test:regression     # typecheck + lint + unit + e2e (pre-merge gate)
+pnpm test:all            # alias of test:regression
 ```
 
-E2E suites and accessibility scans iterate over both locales. Visual regression snapshots are committed under `tests/e2e/*-snapshots/`. Update with `pnpm test:e2e --update-snapshots`.
+E2E, ux/ui, a11y, and seo-header suites iterate both locales and run on desktop + Pixel 7. Visual regression snapshots are committed under `tests/e2e/*-snapshots/`; update with `pnpm test:e2e --update-snapshots`. See [`docs/testing.md`](docs/testing.md) for the full regression playbook.
 
 ## Project layout
 
@@ -95,7 +102,7 @@ components/                          site-header, site-footer, locale-switcher, 
 content/
   data/                              Typed bilingual content fixtures (departments, doctors, programs, news)
   messages/                          en.json, hi.json (parity-tested)
-docs/                                critique-phase-3.md, imagery-and-identity.md, launch-runbook.md
+docs/                                critique-phase-3.md, imagery-and-identity.md, launch-runbook.md, testing.md
 i18n/                                routing, request config
 lib/                                 fonts, site metadata, cn(), seo helpers, search
 payload/                             Payload collection + global definitions
@@ -104,7 +111,7 @@ scripts/
   seed.ts                            Seeder from content/data/* into Payload
   backup-postgres.sh                 pg_dump cron helper
 tests/unit/                          Vitest specs
-tests/e2e/                           Playwright specs (home, a11y, visual)
+tests/e2e/                           Playwright specs (home, a11y, visual, ui-ux, adversarial, seo-header)
 Dockerfile                           multi-stage: deps → dev / builder → runner
 docker-compose.yml                   web + Postgres for local dev
 railway.toml                         Railway build/deploy config (uses Dockerfile)
@@ -144,11 +151,20 @@ Do not commit secrets. `.env.example` is the source of truth for required keys.
 
 See `claude.md` §5.8.
 
+## Security and SEO posture
+
+Set in `next.config.mjs` and asserted by `tests/e2e/seo-header.spec.ts`:
+
+- Global headers: `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`, `Cross-Origin-Opener-Policy: same-origin`.
+- Private routes (`/admin/*`, `/api/*`) additionally send `X-Robots-Tag: noindex, nofollow`.
+- Each locale page emits exactly one parseable `application/ld+json` script plus `canonical` and `hreflang` alternates (`hi-IN`, `en-IN`, `x-default`). Driven by `lib/seo.ts` + `components/json-ld.tsx`; never hand-write inline JSON-LD.
+- `sitemap.xml`, `robots.txt`, and `/[locale]/news/rss.xml` are the canonical bot surfaces. The sitemap excludes `/admin` and `/api/`.
+
 ## Contributing rules
 
 Read `claude.md` end to end before editing. Key constraints:
 
 - Both locales are first-class. Adding an `en.json` key without the matching `hi.json` key fails CI (`tests/unit/messages.test.ts`).
-- E2E and a11y tests must iterate both locales.
+- E2E, ux/ui, a11y, and seo-header suites must iterate both locales.
 - Design bans (no white/black, no icon-card grids, no reflex fonts, no glass / gradient text / em dashes) are enforced by review.
-- Run `pnpm test:all` before opening a PR.
+- Run `pnpm test:regression` before opening a PR.

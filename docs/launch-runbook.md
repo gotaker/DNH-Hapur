@@ -77,20 +77,39 @@ Before the DNS cutover:
 
 ## 8. Performance and accessibility audits (pre-cutover)
 
-Run from the staging URL:
+Run the full regression suite locally pointed at staging (or in CI
+against the production build):
 
 ```bash
-pnpm test:e2e        # Playwright cross-browser smoke
-pnpm test:a11y       # axe WCAG 2.2 AA across all key pages × both locales
+pnpm test:regression       # typecheck + lint + unit + e2e
+# Or, narrow loops:
+pnpm test:e2e              # cross-browser smoke + visual regression
+pnpm test:ui-ux            # interactive surfaces, keyboard, mobile nav
+pnpm test:adversarial      # API hardening, malformed input, oversized queries
+pnpm test:seo-header       # canonical, hreflang, JSON-LD, security headers, sitemap, RSS
+pnpm test:a11y             # axe WCAG 2.2 AA, both locales × desktop + mobile
 ```
 
-Open Lighthouse on `/hi` and `/en` and confirm:
+See [`testing.md`](./testing.md) for the full per-suite playbook.
+
+Then open Lighthouse on `/hi` and `/en` and confirm:
 
 - LCP < 2.5s on Slow 4G
 - CLS < 0.05
 - INP < 200ms
 - Accessibility ≥ 95
 - SEO ≥ 95
+
+Hardening checks that are now automated (verify still green on staging):
+
+- Global security headers (`X-Frame-Options`, `X-Content-Type-Options`,
+  `Referrer-Policy`, `Permissions-Policy`, `Cross-Origin-Opener-Policy`).
+- `X-Robots-Tag: noindex, nofollow` on `/admin/*` and `/api/*`.
+- One parseable `application/ld+json` per locale page; canonical +
+  `hreflang` alternates (`hi-IN`, `en-IN`, `x-default`).
+- `robots.txt` excludes `/admin` and `/api/`, declares `Sitemap:`.
+- `sitemap.xml` lists locale-prefixed URLs only.
+- `/hi/news/rss.xml` and `/en/news/rss.xml` are valid RSS 2.0.
 
 ## 9. DNS cutover
 
@@ -110,3 +129,13 @@ If anything regresses post-cutover:
 - Investigate on staging without time pressure.
 
 The DNS cutover is **the only step that is irreversible without a propagation window**. Everything else can be redeployed.
+
+## 11. Outstanding before tagging the launch release
+
+- Resolve the axe `target-size` violations on `/en`, `/hi/contact`, and
+  `/en/contact` (desktop + mobile). `pnpm test:regression` will fail
+  until these are clean — that's the budget.
+- Audit the GitHub Dependabot advisories on the default branch and
+  patch criticals before tagging `v1.0.0`.
+- Replace the Unsplash hero placeholder with consented institutional
+  photography (see `imagery-and-identity.md` for the brief).

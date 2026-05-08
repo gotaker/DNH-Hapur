@@ -82,7 +82,10 @@ A bilingual (Hindi default, English secondary) institutional site for Dev Nandin
 - **Request interception:** `proxy.ts` at the repo root (Next 16 renamed `middleware` → `proxy`; do not reintroduce a `middleware.ts`).
 - **Styling:** Tailwind CSS 4.2.4 (CSS-first via `@theme` in `app/globals.css`), no `tailwind.config.*`. OKLCH tokens; never `#fff` or `#000`. `tailwindcss` and `@tailwindcss/postcss` are pinned in lockstep.
 - **i18n:** `next-intl` v4 with `[locale]` segment, default locale `hi`. Message catalogs in `content/messages/{en,hi}.json`.
-- **CMS (phase 5):** Payload CMS embedded under `app/(payload)/admin`, Postgres backend.
+- **CMS:** Payload CMS 3.84.1 embedded under `app/(payload)/admin`, Postgres backend, localized EN/HI fields. Collections + globals live in `payload/`. Seed via `pnpm seed`.
+- **Search:** in-memory bilingual fuzzy search (`lib/search.ts`) exposed via `/api/search` and `/[locale]/search`. Postgres `pg_trgm` is the future migration path; the in-memory implementation is bounded to 12 hits per query and is the contract enforced by the adversarial suite.
+- **Email:** Resend for transactional contact form delivery (`/api/contact`). Falls back to a console log in dev so the form is still testable without `RESEND_API_KEY`.
+- **Analytics:** Plausible (`components/analytics.tsx`), gated by `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`. Omit the env var to disable the script entirely — no cookies, no banner needed.
 - **Fonts:** Tiro Devanagari Hindi (display) + Hind (body), both bilingual matched cuts. Loaded via `next/font/google` in `lib/fonts.ts`.
 - **Pkg manager:** `pnpm@10` (matches `packageManager` in `package.json`).
 
@@ -96,7 +99,7 @@ pnpm docker:dev         # docker compose up --build
 pnpm docker:down        # tear down + remove volumes
 ```
 
-The `web` service runs the `dev` Dockerfile target (Turbopack HMR via bind mount); the `db` service is Postgres 17, ready for Payload in phase 5.
+The `web` service runs the `dev` Dockerfile target (Turbopack HMR via bind mount); the `db` service is Postgres 17 backing the Payload CMS at `/admin`.
 
 Host-side scripts (no Docker) still work for quick iteration:
 
@@ -114,8 +117,10 @@ pnpm test:e2e
   - `NEXT_PUBLIC_SITE_URL`
   - `DATABASE_URI` (auto-injected by the Railway Postgres plugin)
   - `PAYLOAD_SECRET` (rotated per environment)
-  - `RESEND_API_KEY` and `CONTACT_TO_EMAIL` (phase 7)
+  - `RESEND_API_KEY` and `CONTACT_TO_EMAIL` (transactional email)
+  - `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` (omit to disable analytics; no banner needed either way)
 - **Never** hardcode environment-specific values. They live in env vars or Payload globals.
+- Full launch playbook (backups, content review, DNS cutover, rollback): `docs/launch-runbook.md`.
 
 ### 5.4 Test methodology
 
@@ -123,23 +128,29 @@ The pyramid is intentional and small. Add tests at the layer that catches the fa
 
 | Layer | Tool | Scope | When to add |
 |---|---|---|---|
-| Type | `tsc --noEmit` | Whole repo | Always — `pnpm typecheck` is part of `test:all`. |
-| Lint | `next lint` | Whole repo | Always — caught at PR time. |
+| Type | `tsc --noEmit` | Whole repo | Always — `pnpm typecheck` runs first inside `test:regression`. |
+| Lint | `eslint .` | Whole repo | Always — caught at PR time. |
 | Unit | Vitest 4 + happy-dom | Pure functions, locale parity, formatters | New utility, new lib, new pure component. |
 | Component | Vitest + @testing-library/react | Components in isolation | When a component has logic worth testing without the network. |
-| E2E | Playwright | Cross-locale flows, real navigation | Every new user-facing flow gets one happy-path E2E. |
-| Accessibility | Playwright + `@axe-core/playwright` | Every public page in both locales | New top-level route. WCAG 2.2 AA — zero violations is the budget. |
-| Visual regression | Playwright screenshots | Home page in both locales (extend per phase) | Before locking a design pass; update with `--update-snapshots`. |
+| E2E (smoke) | Playwright (`tests/e2e/home.spec.ts`) | Cross-locale flows, real navigation, healthcheck, root redirect | Every new user-facing flow gets one happy-path E2E. |
+| UX/UI | Playwright (`tests/e2e/ui-ux.spec.ts`) | Skip link, header controls, mobile nav semantics, contact form, search results | New interactive surface or affordance. |
+| Adversarial API | Playwright (`tests/e2e/adversarial.spec.ts`) | Method hardening, malformed input, honeypot, oversized + injection-shaped queries | Any new public API route, any auth/validation change. |
+| SEO + headers | Playwright (`tests/e2e/seo-header.spec.ts`) | Canonical, hreflang, JSON-LD parseability, security headers, `X-Robots-Tag`, robots.txt, sitemap.xml, RSS | Any change to metadata, headers, or routing surface that search bots see. |
+| Accessibility | Playwright + `@axe-core/playwright` (`tests/e2e/a11y.spec.ts`) | Every public page in both locales, desktop + mobile | New top-level route. WCAG 2.2 AA — zero violations is the budget. |
+| Visual regression | Playwright screenshots (`tests/e2e/visual.spec.ts`) | Home page in both locales (extend per phase) | Before locking a design pass; update with `--update-snapshots`. |
 
 Conventions:
 
-- E2E and a11y suites must run in **both** locales. Iterate `['hi', 'en']`.
+- E2E, ux/ui, and a11y suites must run in **both** locales. Iterate `['hi', 'en']`.
 - Mobile is non-negotiable: the Playwright config runs on `Pixel 7` alongside desktop. Don't ship desktop-only tests.
 - Do not mock i18n in unit tests; if a component depends on `next-intl`, write it as an E2E test instead. Cheaper and more honest.
 - Tests live under `tests/unit/**` (Vitest) and `tests/e2e/**` (Playwright). No co-located tests in `app/` or `components/` — keeps RSC bundles clean.
 - Snapshots are committed (`tests/e2e/*-snapshots/`). Reports and run artifacts (`playwright-report/`, `test-results/`, `coverage/`, `graphify-out/`) are gitignored — anything generated by tools or skills goes here, not into the repo.
-- `pnpm test:all` is the pre-merge gate: typecheck + lint + unit + e2e.
+- Locale switcher must be a real `Link` (from `i18n/routing`), not a `router.replace` button. The UX test asserts the `href` attribute, not a click round-trip — keep the test declarative.
+- `pnpm test:regression` (alias `pnpm test:all`) is the pre-merge gate: `typecheck && lint && vitest && playwright`. Targeted scripts (`test:ui-ux`, `test:adversarial`, `test:seo-header`, `test:a11y`) exist for narrow loops.
 - Vitest is pinned to `4.1.5` and requires `vite@^8` plus `@vitejs/plugin-react@^6` as direct devDeps to satisfy its `./module-runner` / `./internal` subpath exports. Don't "clean up" the explicit `vite` entry — Vitest 4 won't resolve without it.
+- The adversarial oversized-query case must accept `200 | 414 | 431` **and** an `ECONNRESET`. That's the runtime/proxy boundary refusing the request — bounded rejection, not a server crash. Don't tighten the assertion.
+- When adding a new E2E spec, add it to the `scripts` block in `package.json` if it deserves a narrow command, and ensure the default `playwright test` (run via `test:e2e` / `test:regression`) still picks it up.
 
 ### 5.5 Bilingual rules
 
@@ -152,7 +163,7 @@ Conventions:
 
 ### 5.6 Design system rules (impeccable register)
 
-The design lives in `app/globals.css` `@theme` and is enforced by review, not by lint. Read `dnh_hapur_bilingual_rebuild_50f5d78b.plan.md` for the full shape brief.
+The design lives in `app/globals.css` `@theme` and is enforced by review, not by lint. Read `dnh_hapur_bilingual_rebuild_50f5d78b.plan.md` for the full shape brief, and `DESIGN.md` for the canonical explanation of every token.
 
 Hard bans on this codebase:
 
@@ -162,6 +173,16 @@ Hard bans on this codebase:
 - No reflex fonts: Inter, DM Sans, Plus Jakarta, Outfit, Plex, Fraunces, Playfair, Cormorant. Fonts are Tiro + Hind unless deliberately changed.
 - No em dashes in copy.
 - No mocking healthcare clichés (white + teal + smiling stock doctor). The committed colour is the deep hospital blue defined in `--color-brand`.
+
+### 5.6.1 Security and SEO posture
+
+Set in `next.config.mjs` `headers()` and asserted by `tests/e2e/seo-header.spec.ts`:
+
+- Global response headers on every route: `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy: camera=(), microphone=(), geolocation=()`, `Cross-Origin-Opener-Policy: same-origin`.
+- Private routes (`/admin/*`, `/api/*`) additionally send `X-Robots-Tag: noindex, nofollow`. The Payload admin and every API route are out of the search index by default; don't override per-route.
+- Every public locale page emits exactly one `application/ld+json` script (HTML-safe, parseable). `lib/seo.ts` and `components/json-ld.tsx` are the only sources — don't hand-write `<script type="application/ld+json">` inline in a page.
+- Locale pages emit `link[rel=canonical]` plus `hreflang` alternates for `hi-IN`, `en-IN`, `x-default`. Driven by `lib/seo.ts`; new routes pick this up by calling its helpers from `generateMetadata`.
+- `app/sitemap.ts` and `app/robots.ts` are the canonical robots/sitemap surfaces. Sitemap must not contain `/admin` or `/api/`. RSS lives at `/[locale]/news/rss.xml`.
 
 ### 5.7 Update protocol for this file
 
@@ -179,15 +200,19 @@ Keep updates surgical — append to the relevant subsection, do not rewrite §0�
 | Phase | Status | Notes |
 |---|---|---|
 | 0. Bootstrap | done | Next 16.2.6 + React 19.2.0 (pinned) + TS strict + Tailwind 4.2.4 + next-intl v4 + Docker + Railway + test pyramid. |
-| 1. Design system | done | OKLCH tokens, fonts, header / footer / locale switcher, container + eyebrow + rule utilities in place. No component kit (shadcn or otherwise) — DESIGN.md rejects popover-button-modal chrome; conventions live at the call site. |
-| 2. Home | done | Hero, trust strip, departments index, emergency band in both locales. Hero photographic slot is intentionally a tinted block with a wayfinding caption until on-site photography lands in phase 6 (real photography only — no stock, no Unsplash). |
-| 3. Impeccable critique | ready | Run next against the current home + chrome — captures any drift before inner templates fan out. |
-| 4. Inner templates | pending | Department / Doctor / Program / Admissions / Find-a-doctor / Emergency / About / News. Inner pages currently stubs that point back at the home departments index. |
-| 5. Payload CMS | pending | Postgres ready in compose. Mount `/admin`. |
-| 6. Real imagery + identity | pending | Replaces the hero slot block + fills the trust strip with cleared logos, when shot. |
-| 7. Search + forms | pending | pg_trgm + Resend. |
-| 8. Perf / a11y / SEO | pending | |
-| 9. Launch | pending | |
+| 1. Design system | done | OKLCH tokens, fonts, header / footer / locale switcher, container + eyebrow + rule utilities in place. UI primitives in `components/ui/` (Button, Input, Label, Sheet, Dialog, Accordion) are hand-restyled around Radix — they are not a stock shadcn install. |
+| 2. Home | done | Hero, trust strip, departments index, Centers of Excellence, doctors marquee, news, college teaser, emergency band in both locales. Hero photographic slot is a deliberate Unsplash placeholder with a documented brief in `docs/imagery-and-identity.md`; real photography replaces it post-launch. |
+| 3. Impeccable critique | done | `docs/critique-phase-3.md` records the verdict. PASS with photography swap deferred to phase 6. |
+| 4. Inner templates | done | Department / Doctor / Program / Admissions / Find-a-doctor / Emergency / About / News list + detail / Search / Contact all live. Bilingual slugs, JSON-LD per page type. |
+| 5. Payload CMS | done | Mounted under `app/(payload)/admin`, Postgres backend, localized EN/HI fields. Collections: `users`, `media`, `doctors`, `departments`, `programs`, `faculty`, `news`, `locations`, `pages`. Globals: `settings`, `navigation`. Seeder in `scripts/seed.ts`. |
+| 6. Imagery + identity | done | Photography brief, wordmark variants, iconography rules captured in `docs/imagery-and-identity.md`. Real photography is the post-launch swap; the placeholder substrate is intentional. |
+| 7. Search + forms | done | In-memory bilingual fuzzy search (`lib/search.ts` + `/api/search` + `/[locale]/search`). Contact form with honeypot via `/api/contact` + Resend (console fallback in dev). Print stylesheet on emergency page. WhatsApp click-to-chat in chrome. |
+| 8. Perf / a11y / SEO | done | JSON-LD (`Hospital`, `EducationalOrganization`, `Physician`, `MedicalSpecialty`, `NewsArticle`), hreflang alternates, `app/sitemap.ts`, `app/robots.ts`, RSS, hardened security headers, `X-Robots-Tag` on private routes, hero converted to `next/image` for LCP. Plausible analytics gated by `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`. |
+| 9. Launch | ready | Runbook in `docs/launch-runbook.md`. Postgres backup script (`scripts/backup-postgres.sh`). DNS cutover and content review require institutional sign-off before triggering. |
+
+Outstanding before merge to main can ship as a release tag:
+
+- Axe `target-size` violations on `/en`, `/hi/contact`, `/en/contact` (desktop + mobile). Tracked separately; `pnpm test:regression` will fail until they're fixed.
 
 ---
 
