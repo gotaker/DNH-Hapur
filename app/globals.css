@@ -34,11 +34,14 @@
   --color-rule: oklch(0.85 0.012 240);
   --color-rule-strong: oklch(0.72 0.018 245);
 
-  /* Typography — bilingual.
-     Display: Tiro Devanagari Hindi paired with Tiro Latin.
-     Body:    Hind, an Indian Type Foundry family with matched Devanagari + Latin. */
-  --font-display: 'Tiro Devanagari Hindi', 'Tiro', 'EB Garamond', Georgia, serif;
-  --font-sans: 'Hind', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Typography — bilingual, Mass General register.
+     Display: Spectral (Latin) with Tiro Devanagari Hindi as Devanagari fallback.
+     Body:    Helvetica Neue / system Helvetica with Hind as Devanagari fallback.
+     Helvetica Neue is OS-provided (Apple platforms) and falls through to
+     Helvetica/Arial elsewhere — same approach Mass General uses for non-licensed
+     viewers. Hind covers Devanagari glyphs the Helvetica family lacks. */
+  --font-display: 'Spectral', 'Tiro Devanagari Hindi', Georgia, serif;
+  --font-sans: 'Helvetica Neue', Helvetica, Arial, 'Hind', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Modular type scale — fluid clamp(), ratio ≥ 1.25. */

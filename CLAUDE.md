@@ -86,7 +86,7 @@ A bilingual (Hindi default, English secondary) institutional site for Dev Nandin
 - **Search:** in-memory bilingual fuzzy search (`lib/search.ts`) exposed via `/api/search` and `/[locale]/search`. Postgres `pg_trgm` is the future migration path; the in-memory implementation is bounded to 12 hits per query and is the contract enforced by the adversarial suite.
 - **Email:** Resend for transactional contact form delivery (`/api/contact`). Falls back to a console log in dev so the form is still testable without `RESEND_API_KEY`.
 - **Analytics:** Plausible (`components/analytics.tsx`), gated by `NEXT_PUBLIC_PLAUSIBLE_DOMAIN`. Omit the env var to disable the script entirely — no cookies, no banner needed.
-- **Fonts:** Tiro Devanagari Hindi (display) + Hind (body), both bilingual matched cuts. Loaded via `next/font/google` in `lib/fonts.ts`.
+- **Fonts:** Spectral (display, light/300) + Helvetica Neue / system stack (body), mirroring Mass General Brigham's institutional register. Tiro Devanagari Hindi and Hind are loaded as Devanagari fallbacks via the `--font-display` / `--font-sans` cascade so Hindi glyphs render consistently. Latin loads via `next/font/google` in `lib/fonts.ts`; Helvetica Neue is OS-provided (Apple) with Helvetica / Arial as cross-platform fallbacks.
 - **Pkg manager:** `pnpm@10` (matches `packageManager` in `package.json`).
 - **Path aliases:** `@/*` → repo root, `@payload-config` → `./payload.config.ts` (declared in `tsconfig.json`). Prefer aliased imports over deep relative paths for cross-cutting modules (`@/lib/...`, `@/components/...`, `@/i18n/...`).
 
@@ -180,7 +180,7 @@ Hard bans on this codebase:
 - No `#fff` / `#000`. Use `oklch(...)` tokens.
 - No icon-heading-text card grids. Build typographic indices, numbered lists, longform content blocks.
 - No gradient text, no glassmorphism, no side-stripe borders, no rounded-corner icons above headings.
-- No reflex fonts: Inter, DM Sans, Plus Jakarta, Outfit, Plex, Fraunces, Playfair, Cormorant. Fonts are Tiro + Hind unless deliberately changed.
+- No reflex fonts: Inter, DM Sans, Plus Jakarta, Outfit, Plex, Fraunces, Playfair, Cormorant. Display is Spectral (Latin) with Tiro Devanagari Hindi for Devanagari; body is Helvetica Neue / Helvetica / Arial system stack with Hind for Devanagari. Don't reintroduce Tiro/Hind as the primary Latin face — they remain only as Devanagari fallbacks.
 - No em dashes in copy.
 - No mocking healthcare clichés (white + teal + smiling stock doctor). The committed colour is the deep hospital blue defined in `--color-brand`.
 
