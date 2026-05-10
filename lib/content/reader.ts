@@ -46,7 +46,8 @@ function unwrapArray(value: unknown): string[] {
     .map((entry) => {
       if (typeof entry === 'string') return entry;
       if (entry && typeof entry === 'object' && 'item' in entry) {
-        return String((entry as { item: unknown }).item);
+        const item = (entry as { item: unknown }).item;
+        return typeof item === 'string' ? item : null;
       }
       return null;
     })
@@ -69,6 +70,9 @@ function asNullableString(value: unknown): string | null {
   return typeof value === 'string' && value.length > 0 ? value : null;
 }
 
+// Both helpers below assume `depth >= 1` in the calling find(); a string-ID input
+// (the depth=0 shape) intentionally maps to null / [] so the absence of population
+// is visible rather than masked.
 function asMediaRecord(value: unknown): MediaRecord | null {
   if (!value || typeof value !== 'object') return null;
   const v = value as { id?: unknown; url?: unknown; alt?: unknown };
@@ -97,10 +101,16 @@ function asDepartmentRefs(value: unknown): DepartmentRef[] {
 
 // ---------- Doc → Record mappers ----------
 
+function requireId(value: unknown, where: string): string {
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number') return String(value);
+  throw new Error(`ContentReader: missing or non-scalar id in ${where}`);
+}
+
 function mapDoctor(doc: unknown): DoctorRecord {
   const d = doc as Record<string, unknown>;
   return {
-    id: String(d.id),
+    id: requireId(d.id, 'mapDoctor'),
     slug: asString(d.slug),
     name: asString(d.name),
     qualifications: asString(d.qualifications),
@@ -130,7 +140,7 @@ function mapBilingualDoctor(doc: unknown): BilingualDoctorRecord {
     hi: unknown;
   };
   return {
-    id: String(d.id),
+    id: requireId(d.id, 'mapBilingualDoctor'),
     slug: asString(d.slug),
     name: { en: asString(name.en), hi: asString(name.hi) },
     qualifications: asString(d.qualifications),
@@ -184,6 +194,8 @@ export function createReader(payload: Payload): ContentReader {
       const doc = result.docs[0];
       return doc ? mapDoctor(doc) : null;
     },
+    // limit: 1000 is sized for current institutional scale (one hospital,
+    // ~tens-to-low-hundreds of doctors). Revisit if any collection nears 500.
     async listDoctors(locale) {
       const result = await payload.find({
         collection: 'doctors',

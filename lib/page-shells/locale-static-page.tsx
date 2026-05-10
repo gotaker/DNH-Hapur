@@ -8,7 +8,8 @@ export type LocaleStaticPageProps = {
   /**
    * Optional JSON-LD payload. Static — not parameterised on a record,
    * since static pages have nothing to fetch. Compute it at the call
-   * site if it depends on the locale.
+   * site if it depends on the locale. Pass a serializable object; `null`
+   * and `undefined` both suppress the script.
    */
   jsonLd?: unknown;
   body: () => ReactNode;
@@ -30,7 +31,7 @@ export async function localeStaticPage({
   setRequestLocale(locale);
   return (
     <>
-      {jsonLd !== undefined ? <JsonLd data={jsonLd} /> : null}
+      {jsonLd != null ? <JsonLd data={jsonLd} /> : null}
       {body()}
     </>
   );

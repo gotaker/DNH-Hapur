@@ -8,6 +8,10 @@ import type { ContentReader } from './reader';
  * caller awaits the same Reader instance (and the same underlying Payload
  * client). Safe under React Server Components: each request fans out to
  * many Reader calls, all going through this single Payload connection.
+ *
+ * Single-threaded JS guarantees the `cached = ...` assignment in `getReader`
+ * completes before any other call observes the slot, so concurrent first
+ * callers cannot race into a double `getPayload`.
  */
 let cached: Promise<ContentReader> | null = null;
 
