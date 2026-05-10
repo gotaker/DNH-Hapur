@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { Payload } from 'payload';
 import { createReader } from '@/lib/content/reader';
 
@@ -156,6 +156,15 @@ describe('createReader — Doctor surface', () => {
 describe('getReader — production singleton', () => {
   beforeEach(() => {
     vi.resetModules();
+  });
+
+  // Without these unmocks, vi.doMock state from the smoke test below
+  // survives vi.resetModules() and contaminates any later describe block
+  // (or test file) that imports `payload` or `@payload-config` — verified
+  // by an out-of-tree probe before this cleanup was added.
+  afterEach(() => {
+    vi.doUnmock('payload');
+    vi.doUnmock('@payload-config');
   });
 
   it('returns the same Promise across calls (cached)', async () => {
