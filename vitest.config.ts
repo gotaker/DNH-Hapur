@@ -10,6 +10,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(root, '.'),
+      '@payload-config': resolve(root, 'payload.config.ts'),
     },
   },
   test: {

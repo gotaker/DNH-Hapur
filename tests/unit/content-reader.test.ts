@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Payload } from 'payload';
 import { createReader } from '@/lib/content/reader';
 
@@ -150,5 +150,28 @@ describe('createReader — Doctor surface', () => {
     });
     expect(result?.languages.en).toEqual(['Hindi', 'English']);
     expect(result?.languages.hi).toEqual(['हिन्दी', 'अंग्रेज़ी']);
+  });
+});
+
+describe('getReader — production singleton', () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it('returns the same Promise across calls (cached)', async () => {
+    vi.doMock('payload', () => ({
+      getPayload: vi.fn().mockResolvedValue({ find: vi.fn() }),
+    }));
+    vi.doMock('@payload-config', () => ({ default: {} }));
+
+    const { getReader } = await import('@/lib/content');
+
+    const a = getReader();
+    const b = getReader();
+
+    expect(a).toBe(b);
+
+    const { getPayload } = await import('payload');
+    expect(getPayload).toHaveBeenCalledTimes(1);
   });
 });
