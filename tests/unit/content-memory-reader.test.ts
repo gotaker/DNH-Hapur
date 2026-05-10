@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { createMemoryReader } from '@/lib/content/memory-reader';
-import type { BilingualDoctorRecord } from '@/lib/content/types';
+import type {
+  BilingualDepartmentRecord,
+  BilingualDoctorRecord,
+} from '@/lib/content/types';
 
 const drVimlesh: BilingualDoctorRecord = {
   id: 'd1',
@@ -104,5 +107,35 @@ describe('createMemoryReader — Doctor surface', () => {
     const reader = createMemoryReader({ doctors: [drVimlesh] });
     const result = await reader.withAllLocales().getDoctor('nobody');
     expect(result).toBeNull();
+  });
+});
+
+const ivfDept: BilingualDepartmentRecord = {
+  id: 'dep-ivf',
+  slug: { en: 'ivf', hi: 'aaivf' },
+  name: { en: 'IVF & Reproductive Medicine', hi: 'आईवीएफ और प्रजनन चिकित्सा' },
+  summary: {
+    en: 'FOGSI-recognised infertility centre.',
+    hi: 'FOGSI-मान्यता प्राप्त बाँझपन केंद्र।',
+  },
+};
+
+describe('createMemoryReader — Department surface', () => {
+  it('getDepartment returns Reader-resolved record for the locale', async () => {
+    const reader = createMemoryReader({ departments: [ivfDept] });
+    const result = await reader.getDepartment('ivf', 'en');
+    expect(result?.name).toBe('IVF & Reproductive Medicine');
+    expect(result?.summary).toBe('FOGSI-recognised infertility centre.');
+  });
+
+  it('getDepartment matches against the locale-localised slug', async () => {
+    const reader = createMemoryReader({ departments: [ivfDept] });
+    expect(await reader.getDepartment('aaivf', 'hi')).not.toBeNull();
+    expect(await reader.getDepartment('aaivf', 'en')).toBeNull();
+  });
+
+  it('getDepartment returns null for an unknown slug', async () => {
+    const reader = createMemoryReader({ departments: [ivfDept] });
+    expect(await reader.getDepartment('nope', 'en')).toBeNull();
   });
 });

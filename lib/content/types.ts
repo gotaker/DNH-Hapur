@@ -54,6 +54,31 @@ export type BilingualDoctorRecord = {
 };
 
 /**
+ * DepartmentRecord — Reader-resolved (one locale, flat strings).
+ * Returned by `reader.getDepartment(slug, locale)`. Shipped for the
+ * related-departments fallback on the Doctor detail page; expanded
+ * when Department pages cut over to the Reader.
+ */
+export type DepartmentRecord = {
+  id: string;
+  slug: string;
+  name: string;
+  summary: string;
+};
+
+/**
+ * BilingualDepartmentRecord — withAllLocales() return shape for departments.
+ * Slug is localised on Department (cardiology / hridya-rog-vibhag), so the
+ * bilingual variant stores both slugs alongside both names and summaries.
+ */
+export type BilingualDepartmentRecord = {
+  id: string;
+  slug: { en: string; hi: string };
+  name: { en: string; hi: string };
+  summary: { en: string; hi: string };
+};
+
+/**
  * Re-export Locale for callers that import everything from this module.
  */
 export type { Locale };

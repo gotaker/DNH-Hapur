@@ -33,6 +33,8 @@ export type { MemoryFixtures } from './memory-reader';
 export type {
   DoctorRecord,
   BilingualDoctorRecord,
+  DepartmentRecord,
+  BilingualDepartmentRecord,
   DepartmentRef,
   MediaRecord,
   Locale,

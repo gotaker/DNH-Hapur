@@ -4,7 +4,9 @@ import type {
   BilingualContentReader,
 } from './reader';
 import type {
+  BilingualDepartmentRecord,
   BilingualDoctorRecord,
+  DepartmentRecord,
   DoctorRecord,
 } from './types';
 
@@ -14,6 +16,7 @@ import type {
  */
 export type MemoryFixtures = {
   doctors?: BilingualDoctorRecord[];
+  departments?: BilingualDepartmentRecord[];
 };
 
 /**
@@ -36,6 +39,21 @@ function resolveDoctor(d: BilingualDoctorRecord, locale: Locale): DoctorRecord {
 }
 
 /**
+ * Resolve a single Department fixture to one locale.
+ */
+function resolveDepartment(
+  d: BilingualDepartmentRecord,
+  locale: Locale,
+): DepartmentRecord {
+  return {
+    id: d.id,
+    slug: d.slug[locale],
+    name: d.name[locale],
+    summary: d.summary[locale],
+  };
+}
+
+/**
  * createMemoryReader — a ContentReader backed by an in-memory bilingual
  * fixture corpus. Used by unit tests so they don't need Postgres or a
  * Payload bootstrap. The implementation is plain JS; no asynchrony except
@@ -43,10 +61,17 @@ function resolveDoctor(d: BilingualDoctorRecord, locale: Locale): DoctorRecord {
  */
 export function createMemoryReader(fixtures: MemoryFixtures): ContentReader {
   const doctors = fixtures.doctors ?? [];
+  const departments = fixtures.departments ?? [];
 
   const bilingual: BilingualContentReader = {
     async getDoctor(slug) {
       const found = doctors.find((d) => d.slug === slug);
+      return found ?? null;
+    },
+    async getDepartment(slug) {
+      const found = departments.find(
+        (d) => d.slug.en === slug || d.slug.hi === slug,
+      );
       return found ?? null;
     },
   };
@@ -66,6 +91,10 @@ export function createMemoryReader(fixtures: MemoryFixtures): ContentReader {
     },
     async listDoctorSlugs() {
       return doctors.map((d) => d.slug);
+    },
+    async getDepartment(slug, locale) {
+      const found = departments.find((d) => d.slug[locale] === slug);
+      return found ? resolveDepartment(found, locale) : null;
     },
     withAllLocales() {
       return bilingual;

@@ -153,6 +153,47 @@ describe('createReader — Doctor surface', () => {
   });
 });
 
+const ivfDoc = {
+  id: 'dep-ivf',
+  slug: 'ivf',
+  name: 'IVF & Reproductive Medicine',
+  summary: 'FOGSI-recognised infertility centre.',
+};
+
+describe('createReader — Department surface', () => {
+  it('getDepartment queries Payload with localised slug filter and depth=0', async () => {
+    const payload = fakePayload({ docs: [ivfDoc] });
+    const reader = createReader(payload);
+    await reader.getDepartment('ivf', 'en');
+    const find = payload.find as unknown as ReturnType<typeof vi.fn>;
+    expect(find).toHaveBeenCalledWith({
+      collection: 'departments',
+      where: { slug: { equals: 'ivf' } },
+      locale: 'en',
+      depth: 0,
+      limit: 1,
+    });
+  });
+
+  it('getDepartment maps Payload doc to Reader-resolved DepartmentRecord', async () => {
+    const payload = fakePayload({ docs: [ivfDoc] });
+    const reader = createReader(payload);
+    const result = await reader.getDepartment('ivf', 'en');
+    expect(result).toMatchObject({
+      id: 'dep-ivf',
+      slug: 'ivf',
+      name: 'IVF & Reproductive Medicine',
+      summary: 'FOGSI-recognised infertility centre.',
+    });
+  });
+
+  it('getDepartment returns null when Payload returns no docs', async () => {
+    const payload = fakePayload({ docs: [] });
+    const reader = createReader(payload);
+    expect(await reader.getDepartment('nope', 'en')).toBeNull();
+  });
+});
+
 describe('getReader — production singleton', () => {
   beforeEach(() => {
     vi.resetModules();

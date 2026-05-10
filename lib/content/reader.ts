@@ -1,6 +1,13 @@
 import type { Payload } from 'payload';
 import type { Locale } from '@/i18n/routing';
-import type { BilingualDoctorRecord, DepartmentRef, DoctorRecord, MediaRecord } from './types';
+import type {
+  BilingualDepartmentRecord,
+  BilingualDoctorRecord,
+  DepartmentRecord,
+  DepartmentRef,
+  DoctorRecord,
+  MediaRecord,
+} from './types';
 
 /**
  * BilingualContentReader — the escape hatch returned by
@@ -11,6 +18,7 @@ import type { BilingualDoctorRecord, DepartmentRef, DoctorRecord, MediaRecord } 
  */
 export type BilingualContentReader = {
   getDoctor(slug: string): Promise<BilingualDoctorRecord | null>;
+  getDepartment(slug: string): Promise<BilingualDepartmentRecord | null>;
 };
 
 /**
@@ -34,6 +42,11 @@ export type ContentReader = {
   getDoctorsByDepartment(departmentSlug: string, locale: Locale): Promise<DoctorRecord[]>;
   /** All doctor slugs (not localised). Used by `generateStaticParams`. */
   listDoctorSlugs(): Promise<string[]>;
+  /**
+   * Department-by-slug, locale-resolved. depth=0 — the related-departments
+   * fallback on the Doctor detail page only needs slug/name/summary.
+   */
+  getDepartment(slug: string, locale: Locale): Promise<DepartmentRecord | null>;
   /** Bilingual escape hatch — for hreflang + parallel-slug callers. */
   withAllLocales(): BilingualContentReader;
 };
@@ -157,6 +170,32 @@ function mapBilingualDoctor(doc: unknown): BilingualDoctorRecord {
   };
 }
 
+function mapDepartment(doc: unknown): DepartmentRecord {
+  const d = doc as Record<string, unknown>;
+  return {
+    id: requireId(d.id, 'mapDepartment'),
+    slug: asString(d.slug),
+    name: asString(d.name),
+    summary: asString(d.summary),
+  };
+}
+
+function mapBilingualDepartment(doc: unknown): BilingualDepartmentRecord {
+  const d = doc as Record<string, unknown>;
+  const slug = (d.slug ?? { en: '', hi: '' }) as { en: unknown; hi: unknown };
+  const name = (d.name ?? { en: '', hi: '' }) as { en: unknown; hi: unknown };
+  const summary = (d.summary ?? { en: '', hi: '' }) as {
+    en: unknown;
+    hi: unknown;
+  };
+  return {
+    id: requireId(d.id, 'mapBilingualDepartment'),
+    slug: { en: asString(slug.en), hi: asString(slug.hi) },
+    name: { en: asString(name.en), hi: asString(name.hi) },
+    summary: { en: asString(summary.en), hi: asString(summary.hi) },
+  };
+}
+
 // ---------- Factory ----------
 
 /**
@@ -179,6 +218,17 @@ export function createReader(payload: Payload): ContentReader {
       });
       const doc = result.docs[0];
       return doc ? mapBilingualDoctor(doc) : null;
+    },
+    async getDepartment(slug) {
+      const result = await payload.find({
+        collection: 'departments',
+        where: { slug: { equals: slug } },
+        locale: 'all',
+        depth: 0,
+        limit: 1,
+      });
+      const doc = result.docs[0];
+      return doc ? mapBilingualDepartment(doc) : null;
     },
   };
 
@@ -229,6 +279,17 @@ export function createReader(payload: Payload): ContentReader {
           return typeof d.slug === 'string' ? d.slug : null;
         })
         .filter((v): v is string => v !== null);
+    },
+    async getDepartment(slug, locale) {
+      const result = await payload.find({
+        collection: 'departments',
+        where: { slug: { equals: slug } },
+        locale,
+        depth: 0,
+        limit: 1,
+      });
+      const doc = result.docs[0];
+      return doc ? mapDepartment(doc) : null;
     },
     withAllLocales() {
       return bilingual;
