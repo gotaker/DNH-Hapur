@@ -5,7 +5,7 @@ import { Link } from '@/i18n/routing';
 import { Button } from '@/components/ui/button';
 import { JsonLd } from '@/components/json-ld';
 import { departments, getDepartmentBySlug } from '@/content/data/departments';
-import { getDoctorsByDepartment } from '@/content/data/doctors';
+import { getReader } from '@/lib/content';
 import { pick } from '@/content/data/types';
 import { hreflangAlternates, medicalSpecialtyJsonLd } from '@/lib/seo';
 import { routing, type Locale } from '@/i18n/routing';
@@ -29,7 +29,8 @@ export default async function DepartmentDetailPage({
 
   const t = await getTranslations('nav');
   const tActions = await getTranslations('actions');
-  const doctorsHere = getDoctorsByDepartment(dept.slug.en);
+  const reader = await getReader();
+  const doctorsHere = await reader.getDoctorsByDepartment(dept.slug.en, locale);
 
   return (
     <>
@@ -136,15 +137,15 @@ export default async function DepartmentDetailPage({
                       href={`/patients/doctors/${d.slug}`}
                       className="hover:text-brand transition-colors"
                     >
-                      {pick(d.name, locale)}
+                      {d.name}
                     </Link>
                   </h3>
-                  <p className="text-ink-mute mt-1 text-sm">{pick(d.specialty, locale)}</p>
+                  <p className="text-ink-mute mt-1 text-sm">{d.specialty}</p>
                   <p className="text-ink-soft mt-1 font-mono text-[10px] uppercase tracking-wider">
                     {d.qualifications}
                   </p>
                   <p className="text-ink-soft mt-3 text-sm">
-                    <span className="opacity-70">OPD:</span> {pick(d.opdDays, locale)}
+                    <span className="opacity-70">OPD:</span> {d.opdDays ?? ''}
                   </p>
                 </li>
               ))}
