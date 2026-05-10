@@ -2,8 +2,8 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { PageHeader } from '@/components/page-header';
-import { doctors } from '@/content/data/doctors';
-import { pick } from '@/content/data/types';
+import { getReader } from '@/lib/content';
+import { lexicalToPlainText } from '@/lib/content/lexical';
 import type { Locale } from '@/i18n/routing';
 
 export default async function FacultyPage({ params }: { params: Promise<{ locale: Locale }> }) {
@@ -15,7 +15,8 @@ export default async function FacultyPage({ params }: { params: Promise<{ locale
   // For phase 4 we treat senior consultants as faculty. Phase 5 introduces
   // a dedicated Faculty collection in Payload that is distinct from clinical
   // doctors but linked to them.
-  const faculty = doctors;
+  const reader = await getReader();
+  const faculty = await reader.listDoctors(locale);
 
   return (
     <>
@@ -36,7 +37,7 @@ export default async function FacultyPage({ params }: { params: Promise<{ locale
                 {d.image ? (
                   <div className="bg-surface-deep relative aspect-[4/5] w-full overflow-hidden">
                     <Image
-                      src={d.image}
+                      src={d.image.url}
                       alt=""
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
@@ -51,14 +52,16 @@ export default async function FacultyPage({ params }: { params: Promise<{ locale
                     href={`/patients/doctors/${d.slug}`}
                     className="hover:text-brand transition-colors"
                   >
-                    {pick(d.name, locale)}
+                    {d.name}
                   </Link>
                 </h2>
-                <p className="text-ink-mute mt-1 text-sm">{pick(d.specialty, locale)}</p>
+                <p className="text-ink-mute mt-1 text-sm">{d.specialty}</p>
                 <p className="text-ink-soft mt-1 font-mono text-[10px] uppercase tracking-wider">
                   {d.qualifications}
                 </p>
-                <p className="text-ink-mute mt-3 text-sm leading-relaxed">{pick(d.bio, locale)}</p>
+                <p className="text-ink-mute mt-3 text-sm leading-relaxed">
+                  {lexicalToPlainText(d.bio).slice(0, 220)}
+                </p>
               </li>
             ))}
           </ul>
