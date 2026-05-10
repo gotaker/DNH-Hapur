@@ -5,9 +5,9 @@ import { site } from '@/lib/site';
 import { Button } from '@/components/ui/button';
 import { JsonLd } from '@/components/json-ld';
 import { departments } from '@/content/data/departments';
-import { doctors } from '@/content/data/doctors';
 import { news } from '@/content/data/news';
 import { pick } from '@/content/data/types';
+import { getReader } from '@/lib/content';
 import { hospitalJsonLd, hreflangAlternates } from '@/lib/seo';
 import type { Locale } from '@/i18n/routing';
 
@@ -31,10 +31,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
   const t = await getTranslations('home');
   const tActions = await getTranslations('actions');
 
+  const reader = await getReader();
   const centers = departments.filter((d) => d.isCenter);
   const otherDepartments = departments;
   const featuredNews = news.slice(0, 3);
-  const featuredDoctors = doctors.slice(0, 8);
+  const featuredDoctors = (await reader.listDoctors(locale)).slice(0, 8);
 
   return (
     <>
@@ -225,7 +226,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
                 {d.image ? (
                   <div className="bg-surface-deep relative aspect-[4/5] w-full overflow-hidden">
                     <Image
-                      src={d.image}
+                      src={d.image.url}
                       alt=""
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -240,10 +241,10 @@ export default async function HomePage({ params }: { params: Promise<{ locale: L
                     href={`/patients/doctors/${d.slug}`}
                     className="hover:text-brand transition-colors"
                   >
-                    {pick(d.name, locale)}
+                    {d.name}
                   </Link>
                 </h3>
-                <p className="text-ink-mute mt-1 text-sm">{pick(d.specialty, locale)}</p>
+                <p className="text-ink-mute mt-1 text-sm">{d.specialty}</p>
                 <p className="text-ink-soft mt-1 font-mono text-[10px] uppercase tracking-wider">
                   {d.qualifications}
                 </p>
